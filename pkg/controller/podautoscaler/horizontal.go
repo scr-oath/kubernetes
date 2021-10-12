@@ -55,6 +55,7 @@ import (
 var (
 	scaleUpLimitFactor  = 2.0
 	scaleUpLimitMinimum = 4.0
+	parallelWorkers     = 4
 )
 
 type timestampedRecommendation struct {
@@ -173,8 +174,10 @@ func (a *HorizontalController) Run(stopCh <-chan struct{}) {
 		return
 	}
 
-	// start a single worker (we may wish to start more in the future)
-	go wait.Until(a.worker, time.Second, stopCh)
+	// start parallel workers (we may wish to start more in the future or make this more configurable)
+	for i := 0; i < parallelWorkers; i++ {
+		go wait.Until(a.worker, time.Second, stopCh)
+	}
 
 	<-stopCh
 }
